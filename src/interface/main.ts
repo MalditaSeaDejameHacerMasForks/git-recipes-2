@@ -8,18 +8,25 @@ const inpName = document.getElementById(
 const inpCategory = document.getElementById(
   "inp-category",
 ) as HTMLSelectElement | null;
+const inpPrepTime = document.getElementById(
+  "inp-prep-time",
+) as HTMLInputElement | null;
 
 const mainRecipeList = new RecipeList();
 
-if (btnAdd && inpName && inpCategory) {
+if (btnAdd && inpName && inpCategory && inpPrepTime) {
   btnAdd.addEventListener("click", () => {
     const recipesErrorContainer = document.getElementById("add-recipes-error");
     const recipesError = document.getElementById("add-recipes-error-msg");
     try {
       const newRecipe = new Recipe(inpName.value);
       newRecipe.category = inpCategory.value;
+      if (inpPrepTime.value.trim() === "") {
+        throw new Error("El tiempo de preparación es obligatorio.");
+      }
+      newRecipe.prepTime = Number(inpPrepTime.value);
       mainRecipeList.add(newRecipe);
-      clearInputs(inpName, inpCategory);
+      clearInputs(inpName, inpCategory, inpPrepTime);
       recipesErrorContainer?.classList.add("d-none");
       renderRecipes();
       renderFavorites();
@@ -40,9 +47,11 @@ if (btnAdd && inpName && inpCategory) {
 function clearInputs(
   inpNameEl: HTMLInputElement,
   inpCategoryEl: HTMLSelectElement,
+  inpPrepTimeEl: HTMLInputElement,
 ) {
   inpNameEl.value = "";
   inpCategoryEl.selectedIndex = 0;
+  inpPrepTimeEl.value = "";
 }
 
 function renderRecipes() {

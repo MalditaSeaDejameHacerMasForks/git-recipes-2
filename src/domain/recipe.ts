@@ -1,6 +1,7 @@
 export class Recipe {
   _name!: string;
   _category?: string;
+  _prepTime!: number;
   _isFavorite: boolean = false;
 
   constructor(aName: string) {
@@ -27,6 +28,17 @@ export class Recipe {
     this._category = aCategory;
   }
 
+  get prepTime(): number {
+    return this._prepTime;
+  }
+
+  set prepTime(aPrepTime: number) {
+    if (aPrepTime === undefined || aPrepTime === null || isNaN(aPrepTime) || aPrepTime < 0) {
+      throw new Error("El tiempo de preparación es obligatorio y debe ser mayor o igual a 0.");
+    }
+    this._prepTime = aPrepTime;
+  }
+
   get isFavorite(): boolean {
     return this._isFavorite;
   }
@@ -40,6 +52,6 @@ export class Recipe {
   }
 
   toString(): string {
-    return `Receta: ${this.name} - categoría: ${this.category}`;
+    return `Receta: ${this.name} - categoría: ${this.category} - tiempo de preparación: ${this.prepTime} minutos`;
   }
 }
