@@ -21,7 +21,8 @@ if (btnAdd && inpName && inpCategory) {
       mainRecipeList.add(newRecipe);
       clearInputs(inpName, inpCategory);
       recipesErrorContainer?.classList.add("d-none");
-      loadRecipeList(newRecipe);
+      renderRecipes();
+      renderFavorites();
       appendAlert(`${newRecipe.name} agregada correctamente!`, "success");
     } catch (error) {
       recipesErrorContainer?.classList.remove("d-none");
@@ -44,23 +45,136 @@ function clearInputs(
   inpCategoryEl.selectedIndex = 0;
 }
 
-function loadRecipeList(newRecipe: Recipe) {
+function renderRecipes() {
   const recipesList = document.getElementById("recipes-list");
   const recipesContainer = document.getElementById("recipes");
   const emptyList = document.getElementById("empty-list");
 
-  emptyList?.classList.add("d-none");
-  recipesContainer?.classList.remove("d-none");
-  if (recipesList) {
-    const li = document.createElement("li");
-    li.classList.add("list-group-item");
-    li.innerText = newRecipe.toString();
-    recipesList.appendChild(li);
+  const recipes = mainRecipeList.getRecipes();
+
+  if (recipes.length === 0) {
+    emptyList?.classList.remove("d-none");
+    recipesContainer?.classList.add("d-none");
+    if (recipesList) {
+      recipesList.innerHTML = "";
+    }
+  } else {
+    emptyList?.classList.add("d-none");
+    recipesContainer?.classList.remove("d-none");
+    if (recipesList) {
+      recipesList.innerHTML = "";
+      recipes.forEach((recipe) => {
+        const li = document.createElement("li");
+        li.classList.add(
+          "list-group-item",
+          "d-flex",
+          "justify-content-between",
+          "align-items-center",
+        );
+
+        const contentSpan = document.createElement("span");
+        contentSpan.classList.add("ms-2", "me-auto");
+        contentSpan.innerText = recipe.toString();
+
+        const favBtn = document.createElement("button");
+        favBtn.type = "button";
+        favBtn.classList.add("btn", "btn-sm", "btn-fav");
+
+        if (recipe.isFavorite) {
+          favBtn.classList.add("active");
+          favBtn.innerHTML = "★ Favorita";
+          favBtn.title = "Quitar de favoritas";
+        } else {
+          favBtn.innerHTML = "☆ Marcar favorita";
+          favBtn.title = "Agregar a favoritas";
+        }
+
+        favBtn.addEventListener("click", () => {
+          recipe.toggleFavorite();
+          renderRecipes();
+          renderFavorites();
+          if (recipe.isFavorite) {
+            appendAlert(`"${recipe.name}" agregada a favoritas!`, "success");
+          } else {
+            appendAlert(`"${recipe.name}" quitada de favoritas.`, "warning");
+          }
+        });
+
+        li.appendChild(contentSpan);
+        li.appendChild(favBtn);
+        recipesList.appendChild(li);
+      });
+    }
+  }
+}
+
+function renderFavorites() {
+  const favoritesList = document.getElementById("favorites-list");
+  const favoritesContainer = document.getElementById("favorites");
+  const emptyFavoritesList = document.getElementById("empty-favorites-list");
+  const favoritesBadge = document.getElementById("favorites-badge");
+
+  const favorites = mainRecipeList.getFavorites();
+
+  if (favoritesBadge) {
+    if (favorites.length > 0) {
+      favoritesBadge.innerText = String(favorites.length);
+      favoritesBadge.classList.remove("d-none");
+    } else {
+      favoritesBadge.classList.add("d-none");
+    }
+  }
+
+  if (favorites.length === 0) {
+    emptyFavoritesList?.classList.remove("d-none");
+    favoritesContainer?.classList.add("d-none");
+    if (favoritesList) {
+      favoritesList.innerHTML = "";
+    }
+  } else {
+    emptyFavoritesList?.classList.add("d-none");
+    favoritesContainer?.classList.remove("d-none");
+    if (favoritesList) {
+      favoritesList.innerHTML = "";
+      favorites.forEach((recipe) => {
+        const li = document.createElement("li");
+        li.classList.add(
+          "list-group-item",
+          "d-flex",
+          "justify-content-between",
+          "align-items-center",
+        );
+
+        const contentSpan = document.createElement("span");
+        contentSpan.classList.add("ms-2", "me-auto");
+        contentSpan.innerText = recipe.toString();
+
+        const removeBtn = document.createElement("button");
+        removeBtn.type = "button";
+        removeBtn.classList.add("btn", "btn-sm", "btn-outline-danger");
+        removeBtn.innerHTML = "✕ Quitar";
+        removeBtn.title = "Quitar de favoritas";
+
+        removeBtn.addEventListener("click", () => {
+          recipe.isFavorite = false;
+          renderRecipes();
+          renderFavorites();
+          appendAlert(`"${recipe.name}" quitada de favoritas.`, "warning");
+        });
+
+        li.appendChild(contentSpan);
+        li.appendChild(removeBtn);
+        favoritesList.appendChild(li);
+      });
+    }
   }
 }
 
 const alertPlaceholder = document.getElementById("alerts");
-const appendAlert = (message: string, type: "success" | "danger") => {
+const appendAlert = (
+  message: string,
+  type: "success" | "danger" | "warning" | "info" = "success",
+) => {
   if (!alertPlaceholder) return;
   const wrapper = document.createElement("div");
   wrapper.innerHTML = [
@@ -72,7 +186,7 @@ const appendAlert = (message: string, type: "success" | "danger") => {
 
   alertPlaceholder.append(wrapper);
 
-  if (type === "success") {
+  if (type !== "danger") {
     setTimeout(() => {
       const alert = wrapper.querySelector(".alert");
       if (alert) {
@@ -83,3 +197,7 @@ const appendAlert = (message: string, type: "success" | "danger") => {
     }, 3000);
   }
 };
+
+// Initial render
+renderRecipes();
+renderFavorites();

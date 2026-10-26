@@ -1,6 +1,7 @@
 export class Recipe {
   _name!: string;
   _category?: string;
+  _isFavorite: boolean = false;
 
   constructor(aName: string) {
     this.name = aName;
@@ -24,6 +25,18 @@ export class Recipe {
 
   set category(aCategory: string) {
     this._category = aCategory;
+  }
+
+  get isFavorite(): boolean {
+    return this._isFavorite;
+  }
+
+  set isFavorite(value: boolean) {
+    this._isFavorite = value;
+  }
+
+  toggleFavorite(): void {
+    this._isFavorite = !this._isFavorite;
   }
 
   toString(): string {

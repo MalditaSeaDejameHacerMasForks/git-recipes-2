@@ -19,4 +19,8 @@ export class RecipeList {
   getRecipes(): readonly Recipe[] {
     return [...this.#recipes];
   }
+
+  getFavorites(): readonly Recipe[] {
+    return this.#recipes.filter((recipe) => recipe.isFavorite);
+  }
 }
